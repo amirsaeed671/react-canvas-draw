@@ -388,6 +388,66 @@ export class DrawingState {
   };
 }
 
+/**
+ * This state is active when the user is drawing a straight line.
+ */
+export class LineDrawingState {
+  constructor() {
+    this.isDrawing = false;
+    this.points = [];
+  }
+
+  handleMouseWheel = SUPPRESS_SCROLL.bind(this);
+
+  handleDrawStart = (e, canvasDraw) => {
+    e.preventDefault();
+
+    if (e.touches && e.touches.length) {
+      // on touch, set catenary position to touch pos
+      const { x, y } = viewPointFromEvent(canvasDraw.coordSystem, e);
+      canvasDraw.lazy.update({ x, y }, { both: true });
+    }
+
+    return this.handleDrawMove(e, canvasDraw);
+  };
+
+  handleDrawMove = (e, canvasDraw) => {
+    e.preventDefault();
+
+    const { x, y } = viewPointFromEvent(canvasDraw.coordSystem, e);
+    canvasDraw.lazy.update({ x, y });
+    const isDisabled = !canvasDraw.lazy.isEnabled();
+
+    if (!this.isDrawing || isDisabled) {
+      // Start drawing and add point
+      canvasDraw.points.push(canvasDraw.clampPointToDocument(canvasDraw.lazy.brush.toObject()));
+      this.isDrawing = true;
+    }
+
+    // Add new point
+    canvasDraw.points.push(canvasDraw.clampPointToDocument(canvasDraw.lazy.brush.toObject()));
+
+    // Draw current points
+    canvasDraw.drawPoints({
+      points: canvasDraw.points,
+      brushColor: canvasDraw.props.brushColor,
+      brushRadius: canvasDraw.props.brushRadius
+    });
+
+    return this;
+  };
+
+  handleDrawEnd = (e, canvasDraw) => {
+    e.preventDefault();
+
+    // Draw to this end pos
+    this.handleDrawMove(e, canvasDraw);
+    canvasDraw.saveLine();
+
+    return new DefaultState();
+  };
+}
+
 export class SyntheticEvent {
   constructor({ clientX, clientY }) {
     this.clientX = clientX;

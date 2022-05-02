@@ -62,6 +62,7 @@ export default class CanvasDraw extends PureComponent {
     mouseZoomFactor: PropTypes.number,
     zoomExtents: boundsProp,
     clampLinesToDocument: PropTypes.bool,
+    straightLine: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -90,6 +91,7 @@ export default class CanvasDraw extends PureComponent {
     mouseZoomFactor: 0.01,
     zoomExtents: { min: 0.33, max: 3 },
     clampLinesToDocument: false,
+    straightLine: false,
   };
 
   ///// public API /////////////////////////////////////////////////////////////
